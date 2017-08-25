@@ -76,7 +76,7 @@ class wCMS {
 	public static function page($key) {
 		$segments = wCMS::$currentPageExists ? wCMS::get('pages', wCMS::$currentPage) : (wCMS::get('config','login') == wCMS::$currentPage ? (object) wCMS::_loginView() : (object) wCMS::_notFoundView());
 		$segments->content = isset($segments->content) ? $segments->content: '<h2>Click here to create some content</h2> <p>Once you do that, this page will be eventually visited by search engines.</p>';
-		$keys = ['title' => mb_convert_case(str_replace("-", " ", $segments->title), MB_CASE_TITLE), 'description' => $segments->description, 'keywords' => $segments->keywords, 'content' => (wCMS::$loggedIn ? wCMS::editable('content', $segments->content, 'pages') : $segments->content)];
+		$keys = ['title' => $segments->title, 'description' => $segments->description, 'keywords' => $segments->keywords, 'content' => (wCMS::$loggedIn ? wCMS::editable('content', $segments->content, 'pages') : $segments->content)];
 		$content = isset($keys[$key]) ? $keys[$key] : '';
 		return wCMS::_hook('page', $content, $key)[0];
 	}
@@ -234,7 +234,7 @@ EOT;
 		$content = empty($content) ? "empty" : str_replace(array(PHP_EOL,'<br>'), '', $content);
 		$slug = wCMS::_slugify($content);
 		$menuCount = count(get_object_vars(wCMS::get($conf, $field)));
-		if ( ! $exist) { $db=wCMS::db(); $slug.= ($menu) ? "-" . $menuCount : ""; foreach($db->config->{$field} as $key=>$value) if ($value->slug == $slug) $slug.= "-extra"; $db->config->{$field}->{$menuCount} = new stdClass; wCMS::save($db); wCMS::set($conf, $field, $menuCount, 'name', $content); wCMS::set($conf, $field, $menuCount, 'slug', $slug); wCMS::set($conf, $field, $menuCount, 'visibility', $visibility); if ($menu) { wCMS::_createPage($slug);} } else { $oldSlug = wCMS::get($conf, $field, $menu, 'slug'); wCMS::set($conf, $field, $menu, 'name', $content);
+		if ( ! $exist) { $db=wCMS::db(); $slug.= ($menu) ? "-" . $menuCount : ""; foreach($db->config->{$field} as $key=>$value) if ($value->slug == $slug) $slug.= "-extra"; $db->config->{$field}->{$menuCount} = new stdClass; wCMS::save($db); wCMS::set($conf, $field, $menuCount, 'name', str_replace("-", " ", $content)); wCMS::set($conf, $field, $menuCount, 'slug', $slug); wCMS::set($conf, $field, $menuCount, 'visibility', $visibility); if ($menu) { wCMS::_createPage($slug);} } else { $oldSlug = wCMS::get($conf, $field, $menu, 'slug'); wCMS::set($conf, $field, $menu, 'name', $content);
 		wCMS::set($conf, $field, $menu, 'slug', $slug);
 		wCMS::set($conf, $field, $menu, 'visibility', $visibility);
 		if ($slug !== $oldSlug) {wCMS::_createPage($slug); wCMS::_deleteAction($oldSlug, false);}}
