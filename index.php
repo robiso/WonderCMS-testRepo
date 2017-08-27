@@ -234,7 +234,7 @@ EOT;
 		$content = empty($content) ? "empty" : str_replace(array(PHP_EOL,'<br>'), '', $content);
 		$slug = wCMS::_slugify($content);
 		$menuCount = count(get_object_vars(wCMS::get($conf, $field)));
-		if ( ! $exist) { $db=wCMS::db(); $slug.= ($menu) ? "-" . $menuCount : ""; foreach($db->config->{$field} as $key=>$value) if ($value->slug == $slug) $slug.= "-extra"; $db->config->{$field}->{$menuCount} = new stdClass; wCMS::save($db); wCMS::set($conf, $field, $menuCount, 'name', str_replace("-", " ", $content)); wCMS::set($conf, $field, $menuCount, 'slug', $slug); wCMS::set($conf, $field, $menuCount, 'visibility', $visibility); if ($menu) { wCMS::_createPage($slug);} } else { $oldSlug = wCMS::get($conf, $field, $menu, 'slug'); wCMS::set($conf, $field, $menu, 'name', $content);
+		if ( ! $exist) { $db=wCMS::db(); $slug.= ($menu) ? "-" . $menuCount : ""; foreach($db->config->{$field} as $key=>$value) if ($value->slug == $slug) $slug.= "-extra"; $db->config->{$field}->{$menuCount} = new stdClass; wCMS::save($db); wCMS::set($conf, $field, $menuCount, 'name', mb_convert_case(str_replace("-", " ", $content), MB_CASE_TITLE)); wCMS::set($conf, $field, $menuCount, 'slug', $slug); wCMS::set($conf, $field, $menuCount, 'visibility', $visibility); if ($menu) { wCMS::_createPage($slug);} } else { $oldSlug = wCMS::get($conf, $field, $menu, 'slug'); wCMS::set($conf, $field, $menu, 'name', $content);
 		wCMS::set($conf, $field, $menu, 'slug', $slug);
 		wCMS::set($conf, $field, $menu, 'visibility', $visibility);
 		if ($slug !== $oldSlug) {wCMS::_createPage($slug); wCMS::_deleteAction($oldSlug, false);}}
