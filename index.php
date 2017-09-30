@@ -54,6 +54,10 @@ class wCMS {
 			if (file_exists(__DIR__ . '/themes/default/css/style.css')) file_put_contents(__DIR__ . '/themes/default/css/style.css', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/themes/default/css/style.css'));
 			$olddb->config->dbVersion = '2.3.0';
 			wCMS::save($olddb);
+		} elseif ($olddb->config->dbVersion < '2.3.2') {
+			// if (file_exists('.htaccess')) file_put_contents('.htaccess', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/.htaccess'));
+			// $olddb->config->dbVersion = '2.3.2';
+			// wCMS::save($olddb);
 		}
 	}
 	public static function init() {
@@ -66,7 +70,7 @@ class wCMS {
 		if (isset(wCMS::get('pages')->{wCMS::$currentPage})) wCMS::$currentPageExists = true;
 		if (isset($_GET['page']) && ! wCMS::$loggedIn) if (wCMS::$currentPage !== wCMS::_slugify($_GET['page'])) wCMS::$currentPageExists = false;
 		wCMS::_logoutAction(); wCMS::_loginAction(); wCMS::_saveAction(); wCMS::_changePasswordAction(); wCMS::_deleteAction(); wCMS::_upgradeAction(); wCMS::_notify(); wCMS::_removeFile(); wCMS::_uploadFile(); wCMS::_backUp();
-		if ( ! wCMS::$loggedIn && ! wCMS::$currentPageExists) header("HTTP/1.0 404 Not Found");
+		if ( ! wCMS::$loggedIn && ! wCMS::$currentPageExists) header("HTTP/1.1 404 Not Found");
 		if (file_exists(__DIR__ . '/themes/' . wCMS::get('config','theme') . '/functions.php')) require_once __DIR__ . '/themes/' . wCMS::get('config','theme') . '/functions.php';
 		require_once __DIR__ . '/themes/' . wCMS::get('config','theme') . '/theme.php';
 	}
@@ -548,7 +552,7 @@ EOT;
 		if (wCMS::db() !== false) return;
 		wCMS::save([
 			'config' => [
-				'dbVersion' => '2.3.0',
+				'dbVersion' => '2.3.2',
 				'siteTitle' => 'Website title',
 				'theme' => 'default',
 				'defaultPage' => 'home',
@@ -575,7 +579,7 @@ EOT;
 					'content' => '<h1>It\'s alive!</h1>
 
 <h4>Welcome to your WonderCMS powered website.</h4>
-<p><a href="' . wCMS::url('loginURL') . '">Click here to login, the password is <b>admin</b>.</a></p>'
+<p><a href="loginURL">Click here to login, the password is <b>admin</b>.</a></p>'
 				],
 				'example' => [
 					'title' => 'Example',
