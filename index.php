@@ -54,10 +54,6 @@ class wCMS {
 			if (file_exists(__DIR__ . '/themes/default/css/style.css')) file_put_contents(__DIR__ . '/themes/default/css/style.css', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/themes/default/css/style.css'));
 			$olddb->config->dbVersion = '2.3.0';
 			wCMS::save($olddb);
-		} elseif ($olddb->config->dbVersion < '2.3.2') {
-			// if (file_exists('.htaccess')) file_put_contents('.htaccess', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/.htaccess'));
-			// $olddb->config->dbVersion = '2.3.2';
-			// wCMS::save($olddb);
 		}
 	}
 	public static function init() {
@@ -552,7 +548,7 @@ EOT;
 		if (wCMS::db() !== false) return;
 		wCMS::save([
 			'config' => [
-				'dbVersion' => '2.3.2',
+				'dbVersion' => '2.3.0',
 				'siteTitle' => 'Website title',
 				'theme' => 'default',
 				'defaultPage' => 'home',
