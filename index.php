@@ -104,7 +104,7 @@ class wCMS {
 		foreach ($session as $key => $value) foreach ($value as $key => $val) $output .= '<div class="alert alert-'.$val['class'].( ! $val['sticky'] ? ' alert-dismissible' : '').'">'.( ! $val['sticky'] ? '<button type="button" class="close" data-dismiss="alert">&times;</button>' : '').$val['message'].'</div>';
 		return $output;
 	}
-	public static function alert($class, $message, $sticky = false) {¸
+	public static function alert($class, $message, $sticky = false) {
 		if (isset($_SESSION['alert'][$class])) foreach ($_SESSION['alert'][$class] as $k => $v) if ($v['message'] == $message) return;
 		$_SESSION['alert'][$class][] = ['class' => $class, 'message' => $message, 'sticky' => $sticky];
 	}
