@@ -1,7 +1,7 @@
 <?php // WonderCMS - MIT license: wondercms.com/license
 
 session_start();
-define('version', '2.3.1'); // 2.3.2 test version
+define('version', '2.3.2');
 mb_internal_encoding('UTF-8');
 
 class wCMS {
@@ -554,8 +554,8 @@ EOT;
 				'defaultPage' => 'home',
 				'login' => 'loginURL',
 				'password' => password_hash('admin', PASSWORD_DEFAULT),
-				'menuItems'=> [
-					'0'=> [
+				'menuItems' => [
+					'0' => [
 						'name' => 'Home',
 						'slug' => 'home',
 						'visibility' => 'show'
