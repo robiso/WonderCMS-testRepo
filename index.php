@@ -554,8 +554,8 @@ EOT;
 				'defaultPage' => 'home',
 				'login' => 'loginURL',
 				'password' => password_hash('admin', PASSWORD_DEFAULT),
-				'menuItems'=> [
-					'0'=> [
+				'menuItems' => [
+					'0' => [
 						'name' => 'Home',
 						'slug' => 'home',
 						'visibility' => 'show'
