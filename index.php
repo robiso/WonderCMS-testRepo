@@ -10,57 +10,8 @@ class wCMS {
 	public static $currentPageExists = false;
 	public static $_listeners = [];
 	public static $db = false;
-	public static function _updateOtherFiles() {
-		$olddb = wCMS::db();
-		if ( ! isset($olddb->{'config'}->{'dbVersion'})) {
-			if (file_exists(__DIR__ . '/themes/default/theme.php')) file_put_contents(__DIR__ . '/themes/default/theme.php', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/themes/default/theme.php'));
-			if (file_exists(__DIR__ . '/themes/default/css/style.css')) file_put_contents(__DIR__ . '/themes/default/css/style.css', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/themes/default/css/style.css'));
-			if (file_exists('.htaccess')) file_put_contents('.htaccess', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/.htaccess'));
-			unlink('database.js');
-			wCMS::_createDatabase();
-			$newdb = wCMS::db();
-			$newdb->{'config'}->{'siteTitle'} = $olddb->{'config'}->{'siteTitle'};
-			$newdb->{'config'}->{'theme'} = 'default';
-			$newdb->{'config'}->{'defaultPage'} = $olddb->{'config'}->{'defaultPage'};
-			$newdb->{'config'}->{'login'} = $olddb->{'config'}->{'login'};
-			$newdb->{'config'}->{'password'} = $olddb->{'config'}->{'password'};
-			$newdb->{'config'}->{'menuItems'} = $olddb->{'config'}->{'menuItems'};
-			$newdb->{'pages'} = $olddb->{'pages'};
-			$newdb->{'blocks'}->{'subside'}->{'content'} = $olddb->{'config'}->{'subside'};
-			$newdb->{'blocks'}->{'footer'}->{'content'} = $olddb->{'config'}->{'copyright'};
-			wCMS::save($newdb);
-		}
-		if ($olddb->config->dbVersion < '2.1.0') {
-			$newMenu = new stdClass();
-			$newPages = new stdClass();
-			$i = 0;
-			foreach ($olddb->pages as $pageName => $page) {
-				$slugPage = wCMS::_slugify($pageName);
-				$newPages->$slugPage = $page;
-				$newMenu->{$i} = new stdClass;
-				$newMenu->{$i}->name = $page->title;
-				$newMenu->{$i}->slug = $slugPage;
-				$newMenu->{$i}->visibility = "show";
-				$i++;
-			}
-			unset($olddb->config->menuItems);
-			unset($olddb->pages);
-			$olddb->config->menuItems = $newMenu;
-			$olddb->pages = $newPages;
-			$olddb->config->dbVersion = '2.1.0';
-			wCMS::save($olddb);
-		} elseif ($olddb->config->dbVersion < '2.3.0') {
-			if (file_exists(__DIR__ . '/themes/default/theme.php')) file_put_contents(__DIR__ . '/themes/default/theme.php', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/themes/default/theme.php'));
-			if (file_exists(__DIR__ . '/themes/default/css/style.css')) file_put_contents(__DIR__ . '/themes/default/css/style.css', wCMS::_getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/themes/default/css/style.css'));
-			$olddb->config->dbVersion = '2.3.0';
-			wCMS::save($olddb);
-		}
-	}
 	public static function init() {
-		wCMS::_loadPlugins();
-		wCMS::_createDatabase();
-		wCMS::_updateOtherFiles();
-		wCMS::_installThemePlugin();
+		wCMS::_loadPlugins(); wCMS::_createDatabase(); wCMS::_installThemePlugin();
 		if (isset($_SESSION['l'], $_SESSION['i']) && $_SESSION['i'] == __DIR__) wCMS::$loggedIn = true;
 		wCMS::$currentPage = empty(wCMS::parseUrl()) ? wCMS::get('config','defaultPage') : wCMS::parseUrl();
 		if (isset(wCMS::get('pages')->{wCMS::$currentPage})) wCMS::$currentPageExists = true;
@@ -115,7 +66,7 @@ class wCMS {
 		return wCMS::url('themes/' . wCMS::get('config','theme') . '/' . $location);
 	}
 	public static function url($location = '') {
-		return 'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] . ((($_SERVER['SERVER_PORT'] == '80') || ($_SERVER['SERVER_PORT'] == '443'))? '' : ':' . $_SERVER['SERVER_PORT']) . ((dirname($_SERVER['SCRIPT_NAME']) == '/')? '' : dirname($_SERVER['SCRIPT_NAME'])) . '/' . $location;
+		return 'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] . ((($_SERVER['SERVER_PORT'] == '80') || ($_SERVER['SERVER_PORT'] == '443')) ? '' : ':' . $_SERVER['SERVER_PORT']) . ((dirname($_SERVER['SCRIPT_NAME']) == '/') ? '' : dirname($_SERVER['SCRIPT_NAME'])) . '/' . $location;
 	}
 	public static function parseUrl() {
 		if (isset($_GET['page']) && $_GET['page'] == wCMS::get('config','login')) return htmlspecialchars($_GET['page'], ENT_QUOTES);
@@ -212,7 +163,7 @@ class wCMS {
 	public static function css() {
 		if (wCMS::$loggedIn) {
 			$styles = <<<'EOT'
-<style>#adminPanel{background:#e5e5e5;color:#aaa;font-family:"Lucida Sans Unicode",Verdana;font-size:14px;text-align:left;font-variant:small-caps}#adminPanel .fontSize21{font-size:21px}.alert{margin-bottom:0}#adminPanel a{color:#aaa;outline:0;border:0}#adminpanel .alert a{color:#fff}#adminPanel a.btn{color:#fff}#adminPanel div.editText{color:#555;font-variant:normal}#adminPanel .normalFont{font-variant:normal}div.editText{cursor:pointer;border:2px dashed #ccc;display:block}.cursorPointer{cursor:pointer}div.editText textarea{outline:0;border:none;width:100%;resize:none;color:inherit;font-size:inherit;font-family:inherit;background-color:transparent;overflow:hidden;box-sizing:content-box}div.editText:empty{min-height:20px}#save{color:#ccc;left:0;width:100%;height:100%;display:none;position:fixed;text-align:center;padding-top:100px;background:rgba(51,51,51,.8);z-index:2448}.change{padding-left:15px}.marginTop5{margin-top:5px}.marginTop20{margin-top:20px}.marginLeft5{margin-left:5px}.padding20{padding:20px}.subTitle{color:#aaa;font-size:24px;margin:10px 0 5px;font-variant:all-small-caps}.note-editor{border:2px dashed #ccc}.menu-item-hide{color:#5bc0de}.menu-item-delete,.menu-item-hide,.menu-item-show{padding:0 10%}#adminPanel .nav-tabs{border-bottom:2px solid #ddd}#adminPanel .nav-tabs>li>a::after{content:"";background:#1ab;height:2px;position:absolute;width:100%;left:0;bottom:-1px;transition:all 250ms ease 0s;transform:scale(0)}#adminPanel .nav-tabs>li>a::hover{border-bottom: 1px solid #1ab !important:}#adminPanel .nav-tabs>li.active>a::after, #adminPanel .nav-tabs>li:hover>a::after{transform:scale(1)}.tab-content{padding:20px}#adminPanel .modal-content{background-color:#eee}#adminPanel .modal-header{border:0}#adminPanel .nav li{font-size:28px;float:none;display:inline-block}#adminPanel .tab-pane.active a.btn{color:#fff}#adminPanel .nav-tabs>li.active a,#adminPanel .tab-pane.active{background:0 !important;border:0!important;color:#aaa!important}#adminPanel .clear{clear:both}@media(min-width:768px){#adminPanel .modal-xl{width:90%;max-width:1200px}}</style>
+<style>#adminPanel{background:#e5e5e5;color:#aaa;font-family:"Lucida Sans Unicode",Verdana;font-size:14px;text-align:left;font-variant:small-caps}#adminPanel .fontSize21{font-size:21px}.alert{margin-bottom:0}#adminPanel a{color:#aaa;outline:0;border:0}#adminpanel .alert a{color:#fff}#adminPanel a.btn{color:#fff}#adminPanel div.editText{color:#555;font-variant:normal}#adminPanel .normalFont{font-variant:normal}div.editText{cursor:pointer;border:2px dashed #ccc;display:block}.cursorPointer{cursor:pointer}div.editText textarea{outline:0;border:none;width:100%;resize:none;color:inherit;font-size:inherit;font-family:inherit;background-color:transparent;overflow:hidden;box-sizing:content-box}div.editText:empty{min-height:20px}#save{color:#ccc;left:0;width:100%;height:100%;display:none;position:fixed;text-align:center;padding-top:100px;background:rgba(51,51,51,.8);z-index:2448}.change{padding-left:15px}.marginTop5{margin-top:5px}.marginTop20{margin-top:20px}.marginLeft5{margin-left:5px}.padding20{padding:20px}.subTitle{color:#aaa;font-size:24px;margin:10px 0 5px;font-variant:all-small-caps}.note-editor{border:2px dashed #ccc}.menu-item-hide{color:#5bc0de}.menu-item-delete,.menu-item-hide,.menu-item-show{padding:0 10%}#adminPanel .nav-tabs{border-bottom:2px solid #ddd}#adminPanel .nav-tabs>li>a::after{content:"";background:#1ab;height:2px;position:absolute;width:100%;left:0;bottom:-1px;transition:all 250ms ease 0s;transform:scale(0)}#adminPanel .nav-tabs>li>a::hover{border-bottom:1px solid #1ab!important:}#adminPanel .nav-tabs>li.active>a::after,#adminPanel .nav-tabs>li:hover>a::after{transform:scale(1)}.tab-content{padding:20px}#adminPanel .modal-content{background-color:#eee}#adminPanel .modal-header{border:0}#adminPanel .nav li{font-size:28px;float:none;display:inline-block}#adminPanel .tab-pane.active a.btn{color:#fff}#adminPanel .nav-tabs>li.active a,#adminPanel .tab-pane.active{background:0!important;border:0!important;color:#aaa!important}#adminPanel .clear{clear:both}@media(min-width:768px){#adminPanel .modal-xl{width:90%;max-width:1200px}}</style>
 EOT;
 			return wCMS::_hook('css', $styles)[0];
 		}
