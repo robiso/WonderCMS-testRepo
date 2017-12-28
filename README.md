@@ -2,7 +2,7 @@
     The official repository: https://github.com/robiso/wondercms
 
 # WonderCMS 2.4.0
-**Simple and small flat file CMS built with PHP, jQuery, Bootstrap (HTML/CSS).**
+**Simple, responsive and small flat file CMS built with PHP.**
 - Less than 50 functions and 850 lines of code (5 files: index.php, theme.php, style.css, database.js and htaccess)
 - Supports: plugins (hooks/listeners), themes, backups.
 - Project goal: keep it simple, tiny, hassle free (infrequent 1 click updates).
