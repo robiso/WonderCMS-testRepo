@@ -3,9 +3,10 @@
 
 # WonderCMS 2.4.0
 **Simple, responsive and small flat file CMS built with PHP.**
-- Less than 50 functions and 850 lines of code (5 files: index.php, theme.php, style.css, database.js and htaccess)
-- Supports: plugins (hooks/listeners), themes, backups.
-- Project goal: keep it simple, tiny, hassle free (infrequent 1 click updates).
+ - Less than 50 functions and 850 lines of code.
+ - 5 files: index.php, theme.php, style.css, database.js and htaccess.
+ - Supports: plugins (hooks/listeners), themes, backups.
+ - Project goal: keep it simple, tiny, hassle free (infrequent 1 click updates).
 
 ## [Demo](https://www.wondercms.com/demo) • [Download](https://wondercms.com/latest) • [Docs](https://github.com/robiso/wondercms/wiki#wondercms-documentation) • [Community](https://wondercms.com/community) • [Themes](https://wondercms.com/themes) • [Plugins](https://wondercms.com/plugins) • [Donate](https://wondercms.com/donate)
 ### Installation: unzip and upload anywhere on server (docs: [one step install](https://github.com/robiso/wondercms/wiki/One-step-install))
