@@ -1,7 +1,7 @@
 <?php // WonderCMS - MIT license: wondercms.com/license
 
 session_start();
-define('version', '2.3.2'); // 2.4.0 test version
+define('version', '2.4.0');
 mb_internal_encoding('UTF-8');
 
 class wCMS
