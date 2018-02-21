@@ -146,7 +146,7 @@ class wCMS
 		}
 		wCMS::save([
 			'config' => [
-				'dbVersion' => '2.4.1',
+				'dbVersion' => '2.4.0',
 				'siteTitle' => 'Website title',
 				'theme' => 'default',
 				'defaultPage' => 'home',
