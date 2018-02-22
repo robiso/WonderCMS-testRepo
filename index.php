@@ -389,7 +389,7 @@ EOT;
 
 	private static function getOfficialVersion()
 	{
-		$data = trim(wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/version'));
+		$data = trim(wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms-testrepo/master/version'));
 		return $data;
 	}
 
@@ -731,12 +731,12 @@ EOT;
 			return;
 		}
 		if (hash_equals($_REQUEST['token'], wCMS::generateToken())) {
-			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/index.php');
+			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms-testrepo/master/index.php');
 			if ($contents) {
 				file_put_contents(__FILE__, $contents);
+				wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
+				wCMS::redirect(wCMS::$currentPage);
 			}
-			wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
-			wCMS::redirect();
 		}
 	}
 
