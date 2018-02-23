@@ -1,7 +1,7 @@
 <?php // WonderCMS - MIT license: wondercms.com/license
 
 session_start();
-define('version', '2.4.2');
+define('version', '2.4.1');
 mb_internal_encoding('UTF-8');
 
 class wCMS
@@ -36,6 +36,7 @@ class wCMS
 			}
 			wCMS::set('config', 'dbVersion', '2.4.0');
 		}
+		wCMS::upgradeAction();
 		wCMS::backupAction();
 		wCMS::changePasswordAction();
 		wCMS::deleteFileThemePluginAction();
@@ -44,7 +45,6 @@ class wCMS
 		wCMS::logoutAction();
 		wCMS::notifyAction();
 		wCMS::saveAction();
-		wCMS::upgradeAction();
 		wCMS::uploadFileAction();
 		if (! wCMS::$loggedIn && ! wCMS::$currentPageExists) {
 			header("HTTP/1.1 404 Not Found");
@@ -53,21 +53,6 @@ class wCMS
 			require_once __DIR__ . '/themes/' . wCMS::get('config', 'theme') . '/functions.php';
 		}
 		require_once __DIR__ . '/themes/' . wCMS::get('config', 'theme') . '/theme.php';
-	}
-
-	private static function upgradeAction()
-	{
-		if (! wCMS::$loggedIn || ! isset($_POST['upgrade'])) {
-			return;
-		}
-		if (hash_equals($_REQUEST['token'], wCMS::generateToken())) {
-			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms-testrepo/master/index.php');
-			if ($contents) {
-				file_put_contents(__FILE__, $contents);
-			}
-			wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
-			wCMS::redirect(wCMS::$currentPage);
-		}
 	}
 
 	private static function addListener($hook, $functionName)
@@ -738,6 +723,21 @@ EOT;
 		$text = trim(htmlspecialchars(mb_strtolower($text), ENT_QUOTES), '/');
 		$text = trim($text, '-');
 		return empty($text) ? "-" : $text;
+	}
+
+	private static function upgradeAction()
+	{
+		if (! wCMS::$loggedIn || ! isset($_POST['upgrade'])) {
+			return;
+		}
+		if (hash_equals($_REQUEST['token'], wCMS::generateToken())) {
+			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms-testrepo/master/index.php');
+			if ($contents) {
+				file_put_contents(__FILE__, $contents);
+			}
+			wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
+			wCMS::redirect(wCMS::$currentPage);
+		}
 	}
 
 	private static function uploadFileAction()
