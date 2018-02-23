@@ -734,9 +734,9 @@ EOT;
 			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms-testrepo/master/index.php');
 			if ($contents) {
 				file_put_contents(__FILE__, $contents);
-				wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
-				wCMS::redirect(wCMS::$currentPage);
 			}
+			wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
+			wCMS::redirect(wCMS::$currentPage);
 		}
 	}
 
