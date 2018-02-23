@@ -36,7 +36,6 @@ class wCMS
 			}
 			wCMS::set('config', 'dbVersion', '2.4.0');
 		}
-		wCMS::upgradeAction();
 		wCMS::backupAction();
 		wCMS::changePasswordAction();
 		wCMS::deleteFileThemePluginAction();
@@ -44,6 +43,7 @@ class wCMS
 		wCMS::loginAction();
 		wCMS::logoutAction();
 		wCMS::saveAction();
+		wCMS::upgradeAction();
 		wCMS::uploadFileAction();
 		wCMS::notifyAction();
 		if (! wCMS::$loggedIn && ! wCMS::$currentPageExists) {
