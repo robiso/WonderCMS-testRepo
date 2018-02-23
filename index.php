@@ -1,7 +1,7 @@
 <?php // WonderCMS - MIT license: wondercms.com/license
 
 session_start();
-define('version', '2.4.1');
+define('version', '2.4.2');
 mb_internal_encoding('UTF-8');
 
 class wCMS
@@ -43,9 +43,9 @@ class wCMS
 		wCMS::deletePageAction();
 		wCMS::loginAction();
 		wCMS::logoutAction();
-		wCMS::notifyAction();
 		wCMS::saveAction();
 		wCMS::uploadFileAction();
+		wCMS::notifyAction();
 		if (! wCMS::$loggedIn && ! wCMS::$currentPageExists) {
 			header("HTTP/1.1 404 Not Found");
 		}
@@ -736,7 +736,7 @@ EOT;
 				file_put_contents(__FILE__, $contents);
 			}
 			wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
-			wCMS::redirect(wCMS::$currentPage);
+			wCMS::redirect();
 		}
 	}
 
