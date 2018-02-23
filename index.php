@@ -55,6 +55,21 @@ class wCMS
 		require_once __DIR__ . '/themes/' . wCMS::get('config', 'theme') . '/theme.php';
 	}
 
+	private static function upgradeAction()
+	{
+		if (! wCMS::$loggedIn || ! isset($_POST['upgrade'])) {
+			return;
+		}
+		if (hash_equals($_REQUEST['token'], wCMS::generateToken())) {
+			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms-testrepo/master/index.php');
+			if ($contents) {
+				file_put_contents(__FILE__, $contents);
+			}
+			wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
+			wCMS::redirect(wCMS::$currentPage);
+		}
+	}
+
 	private static function addListener($hook, $functionName)
 	{
 		wCMS::$listeners[$hook][] = $functionName;
@@ -723,21 +738,6 @@ EOT;
 		$text = trim(htmlspecialchars(mb_strtolower($text), ENT_QUOTES), '/');
 		$text = trim($text, '-');
 		return empty($text) ? "-" : $text;
-	}
-
-	private static function upgradeAction()
-	{
-		if (! wCMS::$loggedIn || ! isset($_POST['upgrade'])) {
-			return;
-		}
-		if (hash_equals($_REQUEST['token'], wCMS::generateToken())) {
-			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms-testrepo/master/index.php');
-			if ($contents) {
-				file_put_contents(__FILE__, $contents);
-			}
-			wCMS::alert('success', 'WonderCMS successfully updated. Wohoo!');
-			wCMS::redirect(wCMS::$currentPage);
-		}
 	}
 
 	private static function uploadFileAction()
