@@ -36,11 +36,11 @@ class wCMS
 			}
 			wCMS::set('config', 'dbVersion', '2.4.0');
 		}
-		wCMS::backupAction();
 		wCMS::changePasswordAction();
 		wCMS::deleteFileThemePluginAction();
-		wCMS::deletePageAction();
+		wCMS::backupAction();
 		wCMS::loginAction();
+		wCMS::deletePageAction();
 		wCMS::logoutAction();
 		wCMS::saveAction();
 		wCMS::upgradeAction();
@@ -124,7 +124,7 @@ class wCMS
 		if (! wCMS::$loggedIn || ! isset($_POST['old_password']) || ! isset($_POST['new_password'])) {
 			return;
 		}
-		if ($_SESSION['token'] === $_REQUEST['token'] && hash_equals($_REQUEST['token'], wCMS::generateToken())) {
+		if ($_SESSION['token'] === $_POST['token'] && hash_equals($_POST['token'], wCMS::generateToken())) {
 			if (! password_verify($_POST['old_password'], wCMS::get('config', 'password'))) {
 				wCMS::alert('danger', 'Wrong password.');
 				wCMS::redirect();
@@ -264,7 +264,7 @@ class wCMS
 	{
 		if (wCMS::$loggedIn) {
 			$styles = <<<'EOT'
-<style>#adminPanel{background:#e5e5e5;color:#aaa;font-family:"Lucida Sans Unicode",Verdana;font-size:14px;text-align:left;font-variant:small-caps}#adminPanel .fontSize21{font-size:21px}.alert{margin-bottom:0}#adminPanel a{color:#aaa;outline:0;border:0;text-decoration:none;}#adminpanel .alert a{color:#fff}#adminPanel a.btn{color:#fff}#adminPanel div.editText{color:#555;font-variant:normal}#adminPanel .normalFont{font-variant:normal}div.editText{word-wrap:break-word;cursor:pointer;border:2px dashed #ccc;display:block}.cursorPointer{cursor:pointer}div.editText textarea{outline:0;border:none;width:100%;resize:none;color:inherit;font-size:inherit;font-family:inherit;background-color:transparent;overflow:hidden;box-sizing:content-box}div.editText:empty{min-height:20px}#save{color:#ccc;left:0;width:100%;height:100%;display:none;position:fixed;text-align:center;padding-top:100px;background:rgba(51,51,51,.8);z-index:2448}.change{padding-left:15px}.marginTop5{margin-top:5px}.marginTop20{margin-top:20px}.marginLeft5{margin-left:5px}.padding20{padding:20px}.subTitle{color:#aaa;font-size:24px;margin:10px 0 5px;font-variant:all-small-caps}.menu-item-hide{color:#5bc0de}.menu-item-delete,.menu-item-hide,.menu-item-show{padding:0 10%}#adminPanel .nav-tabs{border-bottom:2px solid #ddd}#adminPanel .nav-tabs>li>a::after{content:"";background:#1ab;height:2px;position:absolute;width:100%;left:0;bottom:-1px;transition:all 250ms ease 0s;transform:scale(0)}#adminPanel .nav-tabs>li>a::hover{border-bottom:1px solid #1ab!important:}#adminPanel .nav-tabs>li.active>a::after,#adminPanel .nav-tabs>li:hover>a::after{transform:scale(1)}.tab-content{padding:20px}#adminPanel .modal-content{background-color:#eee}#adminPanel .modal-header{border:0}#adminPanel .nav li{font-size:30px;float:none;display:inline-block}#adminPanel .tab-pane.active a.btn{color:#fff}#adminPanel .nav-tabs>li.active a,#adminPanel .tab-pane.active{background:0!important;border:0!important;color:#aaa!important}#adminPanel .clear{clear:both}@media(min-width:768px){#adminPanel .modal-xl{width:90%;max-width:1200px}}</style>
+<style>#adminPanel{background:#e5e5e5;color:#aaa;font-family:"Lucida Sans Unicode",Verdana;font-size:14px;text-align:left;font-variant:small-caps}#adminPanel .fontSize21{font-size:21px}.alert{margin-bottom:0}#adminPanel a{color:#aaa;outline:0;border:0;text-decoration:none;}#adminpanel .alert a{color:#fff}#adminPanel a.btn{color:#fff}#adminPanel div.editText{color:#555;font-variant:normal}#adminPanel .normalFont{font-variant:normal}div.editText{word-wrap:break-word;cursor:pointer;border:2px dashed #ccc;display:block}.cursorPointer{cursor:pointer}div.editText textarea{outline:0;border:none;width:100%;resize:none;color:inherit;font-size:inherit;font-family:inherit;background-color:transparent;overflow:hidden;box-sizing:content-box}div.editText:empty{min-height:20px}#save{color:#ccc;left:0;width:100%;height:100%;display:none;position:fixed;text-align:center;padding-top:100px;background:rgba(51,51,51,.8);z-index:2448}.change{padding-left:15px}.marginTop5{margin-top:5px}.marginTop20{margin-top:20px}.marginLeft5{margin-left:5px}.padding20{padding:20px}.subTitle{color:#aaa;font-size:24px;margin:10px 0 5px;font-variant:all-small-caps}.menu-item-hide{color:#5bc0de}.menu-item-delete,.menu-item-hide,.menu-item-show{padding:0 10%}#adminPanel .nav-tabs{border-bottom:2px solid #ddd}#adminPanel .nav-tabs>li>a:after{content:"";background:#1ab;height:2px;position:absolute;width:100%;left:0;bottom:-1px;transition:all 250ms ease 0s;transform:scale(0)}#adminPanel .nav-tabs>li>a:hover{border-bottom:1px solid #1ab!important:}#adminPanel .nav-tabs>li.active>a:after,#adminPanel .nav-tabs>li:hover>a:after{transform:scale(1)}.tab-content{padding:20px}#adminPanel .modal-content{background-color:#eee}#adminPanel .modal-header{border:0}#adminPanel .nav li{font-size:30px;float:none;display:inline-block}#adminPanel .tab-pane.active a.btn{color:#fff}#adminPanel .nav-tabs>li.active a,#adminPanel .tab-pane.active{background:0!important;border:0!important;color:#aaa!important}#adminPanel .clear{clear:both}@media(min-width:768px){#adminPanel .modal-xl{width:90%;max-width:1200px}}</style>
 EOT;
 			return wCMS::hook('css', $styles)[0];
 		}
@@ -290,25 +290,19 @@ EOT;
 				];
 				foreach($deleteList as $entry) {
 					list($folder, $request) = $entry;
-					$filename = isset($_REQUEST[$request]) ? trim($_REQUEST[$request]) : false;
-					$basePath = $folder . "/";
-					$realBase = realpath($basePath);
-					$userPath = $basePath . $filename;
-					$realUserPath = realpath($userPath);
-					if ($realUserPath != true || strpos($realUserPath, $realBase) === 0) {
-						if (!$filename || empty($filename)) {
-							continue;
-						}
-						if ($filename == wCMS::get('config', 'theme')) {
-							wCMS::alert('danger', 'Cannot delete currently active theme.');
-							wCMS::redirect();
-							continue;
-						}
-						if (file_exists("{$folder}/{$filename}")) {
-							wCMS::recursiveDelete("{$folder}/{$filename}");
-							wCMS::alert('success', "Deleted {$filename}.");
-							wCMS::redirect();
-						}
+					$filename = isset($_REQUEST[$request]) ? str_ireplace(['./', '../', '..', '~', '~/'], null, trim($_REQUEST[$request])) : false;
+					if (! $filename || empty($filename)) { 
+						continue;
+					}
+					if ($filename == wCMS::get('config', 'theme')) {
+						wCMS::alert('danger', 'Cannot delete currently active theme.');
+						wCMS::redirect();
+						continue;
+					}
+					if (file_exists("{$folder}/{$filename}")) {
+						wCMS::recursiveDelete("{$folder}/{$filename}");
+						wCMS::alert('success', "Deleted {$filename}.");
+						wCMS::redirect();
 					}
 				}
 			}
@@ -415,7 +409,7 @@ EOT;
 		if (! wCMS::$loggedIn && ! isset($_POST['installAddon'])) {
 			return;
 		}
-		if (hash_equals($_REQUEST['token'], wCMS::generateToken())) {
+		if (hash_equals($_POST['token'], wCMS::generateToken())) {
 			$installLocation = trim(strtolower($_POST['installLocation']));
 			$addonURL = $_POST['addonURL'];
 			$validPaths = array("themes", "plugins");
@@ -550,7 +544,7 @@ EOT;
 		}
 		$repoVersion = wCMS::getOfficialVersion();
 		if ($repoVersion != version) {
-			wCMS::alert('info', '<b>New WonderCMS update available</b><p>- Backup your website and check <a href="https://wondercms.com/whatsnew" target="_blank"><u>what\'s new</u></a> before updating.</p><form action="' . wCMS::url(wCMS::$currentPage) . '" method="post" class="marginTop5"><button type="submit" class="btn btn-info" name="backup">Download backup</button><input type="hidden" name="token" value="' . wCMS::generateToken() . '"></form><form action="" method="post" class="marginTop5"><button class="btn btn-info" name="upgrade">Update WonderCMS</button><input type="hidden" name="token" value="' . wCMS::generateToken() . '"></form>', true);
+			wCMS::alert('info', '<h4><b>New WonderCMS update available</b></h4>- Backup your website and check <a href="https://wondercms.com/whatsnew" target="_blank"><u>what\'s new</u></a> before updating.<form action="' . wCMS::url(wCMS::$currentPage) . '" method="post" class="marginTop5"><button type="submit" class="btn btn-info" name="backup">Download backup</button><input type="hidden" name="token" value="' . wCMS::generateToken() . '"></form><form action="" method="post" class="marginTop5"><button class="btn btn-info" name="upgrade">Update WonderCMS to version '.wCMS::getOfficialVersion().'</button><input type="hidden" name="token" value="' . wCMS::generateToken() . '"></form>', true);
 		}
 	}
 
@@ -617,7 +611,7 @@ EOT;
 		if (! wCMS::$loggedIn) {
 			return;
 		}
-		if (isset($_POST['fieldname']) && isset($_POST['content']) && isset($_POST['target']) && isset($_REQUEST['token']) && hash_equals($_REQUEST['token'], wCMS::generateToken())) {
+		if (isset($_POST['fieldname']) && isset($_POST['content']) && isset($_POST['target']) && isset($_POST['token']) && hash_equals($_POST['token'], wCMS::generateToken())) {
 			list($fieldname, $content, $target, $menu, $visibility) = wCMS::hook('save', $_POST['fieldname'], $_POST['content'], $_POST['target'], $_POST['menu'], $_POST['visibility']);
 			if ($target === 'menuItem') {
 				wCMS::createMenuItem($content, $menu, $visibility);
@@ -730,7 +724,7 @@ EOT;
 		if (! wCMS::$loggedIn || ! isset($_POST['upgrade'])) {
 			return;
 		}
-		if (hash_equals($_REQUEST['token'], wCMS::generateToken())) {
+		if (hash_equals($_POST['token'], wCMS::generateToken())) {
 			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/index.php');
 			if ($contents) {
 				file_put_contents(__FILE__, $contents);
@@ -742,11 +736,11 @@ EOT;
 
 	private static function uploadFileAction()
 	{
-		if (! wCMS::$loggedIn && ! isset($_FILES['uploadFile']) && ! isset($_REQUEST['token'])) {
+		if (! wCMS::$loggedIn && ! isset($_FILES['uploadFile']) && ! isset($_POST['token'])) {
 			return;
 		}
 		$allowed = ['gif' => 'image/gif', 'jpg' => 'image/jpeg', 'ico' => 'image/x-icon', 'png' => 'image/png', 'svg' => 'image/svg+xml', 'txt' => 'text/plain', 'doc' => 'application/vnd.ms-word', 'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'kdbx' => 'application/octet-stream', 'ods' => 'application/vnd.oasis.opendocument.spreadsheet', 'odt' => 'application/vnd.oasis.opendocument.text', 'ogg' => 'application/ogg', 'pdf' => 'application/pdf', 'ppt' => 'application/vnd.ms-powerpoint', 'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'psd' => 'application/photoshop', 'rar' => 'application/rar', 'xls' => 'application/vnd.ms-excel', 'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'zip' => 'application/zip', 'm4a' => 'audio/mp4', 'mp3' => 'audio/mpeg', 'avi' => 'video/avi', 'flv' => 'video/x-flv', 'mkv' => 'video/x-matroska', 'mov' => 'video/quicktime', 'mp4' => 'video/mp4', 'mpg' => 'video/mpeg', 'ogv' => 'video/ogg', 'webm' => 'video/webm', 'wmv' => 'video/x-ms-wmv'];
-		if (isset($_REQUEST['token']) && hash_equals($_REQUEST['token'], wCMS::generateToken()) && isset($_FILES['uploadFile'])) {
+		if (isset($_POST['token']) && hash_equals($_POST['token'], wCMS::generateToken()) && isset($_FILES['uploadFile'])) {
 			try {
 				if (! isset($_FILES['uploadFile']['error']) || is_array($_FILES['uploadFile']['error'])) {
 					wCMS::alert('danger', 'Invalid parameters.');
