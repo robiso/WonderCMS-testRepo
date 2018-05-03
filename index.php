@@ -1,7 +1,7 @@
 <?php // WonderCMS - MIT license: wondercms.com/license
 
 session_start();
-define('version', '2.5.1');
+define('version', '2.5.0');
 mb_internal_encoding('UTF-8');
 
 class wCMS
@@ -116,24 +116,23 @@ class wCMS
 
 	private static function betterSecurityAction()
 	{
-		if (wCMS::$loggedIn && isset($_POST['betterSecurity']) && isset($_POST['token'])) {
-			if (hash_equals($_POST['token'], wCMS::generateToken())) {
-				if ($_POST['betterSecurity'] == 'on') {
-					$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/.htaccess-ultimate');
-					if ($contents) {
-						file_put_contents('.htaccess', trim($contents));
-					}
-					wCMS::alert('success', 'Better security turned ON.');
-					wCMS::redirect();
-				} elseif ($_POST['betterSecurity'] == 'off') {
-					$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/.htaccess');
-					if ($contents) {
-						file_put_contents('.htaccess', trim($contents));
-					}
-					wCMS::alert('success', 'Better security turned OFF.');
-					wCMS::redirect();
-				}
+		if (! wCMS::$loggedIn && ! isset($_POST['betterSecurity'])) {
+			return;
+		}
+		if (hash_equals($_POST['token'], wCMS::generateToken()) && $_POST['betterSecurity'] == 'on') {
+			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/.htaccess-ultimate');
+			if ($contents) {
+				file_put_contents('.htaccess', trim($contents));
 			}
+			wCMS::alert('success', 'Better security turned ON.');
+			wCMS::redirect();
+		} elseif (hash_equals($_POST['token'], wCMS::generateToken()) && $_POST['betterSecurity'] == 'off') {
+			$contents = wCMS::getExternalFile('https://raw.githubusercontent.com/robiso/wondercms/master/.htaccess');
+			if ($contents) {
+				file_put_contents('.htaccess', trim($contents));
+			}
+			wCMS::alert('success', 'Better security turned OFF.');
+			wCMS::redirect();
 		}
 	}
 
@@ -145,20 +144,21 @@ class wCMS
 
 	private static function changePasswordAction()
 	{
-		if (wCMS::$loggedIn && isset($_POST['old_password']) && isset($_POST['new_password'])) {
-			if ($_SESSION['token'] === $_POST['token'] && hash_equals($_POST['token'], wCMS::generateToken())) {
-				if (! password_verify($_POST['old_password'], wCMS::get('config', 'password'))) {
-					wCMS::alert('danger', 'Wrong password.');
-					wCMS::redirect();
-				}
-				if (strlen($_POST['new_password']) < 4) {
-					wCMS::alert('danger', 'Password must be longer than 4 characters.');
-					wCMS::redirect();
-				}
-				wCMS::set('config', 'password', password_hash($_POST['new_password'], PASSWORD_DEFAULT));
-				wCMS::alert('success', 'Password changed.');
+		if (! wCMS::$loggedIn || ! isset($_POST['old_password']) || ! isset($_POST['new_password'])) {
+			return;
+		}
+		if ($_SESSION['token'] === $_POST['token'] && hash_equals($_POST['token'], wCMS::generateToken())) {
+			if (! password_verify($_POST['old_password'], wCMS::get('config', 'password'))) {
+				wCMS::alert('danger', 'Wrong password.');
 				wCMS::redirect();
 			}
+			if (strlen($_POST['new_password']) < 4) {
+				wCMS::alert('danger', 'Password must be longer than 4 characters.');
+				wCMS::redirect();
+			}
+			wCMS::set('config', 'password', password_hash($_POST['new_password'], PASSWORD_DEFAULT));
+			wCMS::alert('success', 'Password changed.');
+			wCMS::redirect();
 		}
 	}
 
@@ -191,8 +191,8 @@ class wCMS
 			'pages' => [
 				'404' => [
 					'title' => '404',
-					'keywords' => '404',
-					'description' => '404',
+					'keywords' => '',
+					'description' => '',
 					'content' => '<h1>Sorry, page not found. :(</h1>'
 				],
 				'home' => [
@@ -433,14 +433,9 @@ EOT;
 			return;
 		}
 		if (hash_equals($_POST['token'], wCMS::generateToken())) {
-			if (isset($_POST['installLocation'])) {
-				$installLocation = trim(strtolower($_POST['installLocation']));
-				$addonURL = $_POST['addonURL'];
-				$validPaths = array("themes", "plugins");
-			} else {
-				wCMS::alert('danger', 'Choose between theme or plugin.');
-				wCMS::redirect();
-			}
+			$installLocation = trim(strtolower($_POST['installLocation']));
+			$addonURL = $_POST['addonURL'];
+			$validPaths = array("themes", "plugins");
 			if (in_array($installLocation, $validPaths) && ! empty($addonURL)) {
 				$zipFile = __DIR__ . '/files/ZIPFromURL.zip';
 				$zipResource = fopen($zipFile, "w");
@@ -461,6 +456,9 @@ EOT;
 				$zip->close();
 				wCMS::recursiveDelete(__DIR__ . '/files/ZIPFromURL.zip');
 				wCMS::alert('success', 'Installed successfully.');
+				wCMS::redirect();
+			} elseif (empty($installLocation)) {
+				wCMS::alert('danger', 'Choose between theme or plugin.');
 				wCMS::redirect();
 			} else {
 				wCMS::alert('danger', 'Enter URL to ZIP file.');
